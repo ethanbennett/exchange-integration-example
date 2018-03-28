@@ -14,13 +14,13 @@ class App extends Component {
       ConfigFactory.create('decentralized-oasis-without-proxies')
     );
 
-    // Use the maker instance to call functions:
     this.openCdp(maker);
 
     // TODO: use returned CDP to call further functions, e.g. `cdp.shut()`
   }
-
+  
   async openCdp(maker) {
+    // Use the maker instance to call functions:
     const cdp = await maker.openCdp();
     console.log('CDP:', cdp);
   }
