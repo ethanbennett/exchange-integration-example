@@ -2,27 +2,79 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { ConfigFactory, Maker } from '@makerdao/makerdao-exchange-integration';
+import { ConfigFactory, Maker, service } from '@makerdao/makerdao-exchange-integration';
 
 class App extends Component {
-  componentDidMount() {
-    console.log('ConfigFactory:', ConfigFactory);
-    console.log('Maker:', Maker);
+  constructor(props) {
+    super(props);
 
+      this.state = {
+        cdp: '',
+        cdpId: '',
+        maker: ''
+      }
+  }
+
+  async componentDidMount() {
     // Use ConfigFactory and 'decentralized-oasis-without-proxies' preset to initialize a maker object:
-    const maker = new Maker(
+    const maker = await new Maker(
       ConfigFactory.create('decentralized-oasis-without-proxies')
     );
 
-    this.openCdp(maker);
+    this.setState({ maker: maker });
+    this.testMakerFunctionality();
+  }
 
-    // TODO: use returned CDP to call further functions, e.g. `cdp.shut()`
+  async testMakerFunctionality() {
+    await this.openCdp();
+    this.getCdp();
+    this.lockEth();
+    this.getInfo();
+    this.shutCdp();
   }
   
-  async openCdp(maker) {
+  async openCdp() {
     // Use the maker instance to call functions:
-    const cdp = await maker.openCdp();
-    console.log('CDP:', cdp);
+    const { maker } = this.state;
+    const txn = await maker.openCdp()
+
+    // Use transaction events to wait for events on the blockchain:
+    const cdp = await txn.onMined()
+
+    return this.setState({
+      cdp: cdp,
+      cdpId: await cdp.getCdpId()
+    });
+  }
+
+  async getCdp() {
+    const { maker, cdpId } = this.state;
+
+    const newCdp = await maker.getCdp(cdpId);
+    console.log(newCdp);
+  }
+
+  async lockEth() {
+    const { cdp } = this.state;
+
+    const txn = await cdp.lockEth('0.1');
+    // console.log(txn);
+  }
+
+  async getInfo() {
+    const { cdp } = this.state;
+
+    const info = await cdp.getInfo();
+    // console.log(info);
+  }
+
+  async shutCdp() {
+    const { cdp, cdpId, maker } = this.state;
+
+    const txn = await cdp.shut();
+    // console.log(txn);
+    txn.onMined();
+    // console.log(await maker.getCdp(cdpId));
   }
 
   render() {
