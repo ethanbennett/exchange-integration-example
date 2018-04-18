@@ -22,16 +22,18 @@ class App extends Component {
     );
 
     this.setState({ maker: maker });
-    this.testMakerFunctionality();
+    console.log('Maker object:', maker);
+    await this.testMakerFunctionality();
   }
 
   async testMakerFunctionality() {
     await this.openCdp();
-    this.getCdp();
-    this.lockEth();
-    this.getInfo();
-    this.shutCdp();
-  }
+    await this.getCdp();
+    await this.lockEth();
+    await this.getInfo();
+    await this.shutCdp();
+    return;
+}
   
   async openCdp() {
     // Use the maker instance to call functions:
@@ -39,42 +41,51 @@ class App extends Component {
     const txn = await maker.openCdp()
 
     // Use transaction events to wait for events on the blockchain:
-    const cdp = await txn.onMined()
+    const cdp = await txn.onMined();
+    const cdpId = await cdp.getCdpId();
 
-    return this.setState({
+    console.log('Opened CDP:', cdp);
+    console.log('Opened CDP ID:', cdpId);
+
+    this.setState({
       cdp: cdp,
-      cdpId: await cdp.getCdpId()
+      cdpId: cdpId
     });
+
+    return;
   }
 
   async getCdp() {
     const { maker, cdpId } = this.state;
 
     const newCdp = await maker.getCdp(cdpId);
-    console.log(newCdp);
+    console.log('Created CDP wrapper object (from ID):', newCdp);
+    return;
   }
 
   async lockEth() {
     const { cdp } = this.state;
 
     const txn = await cdp.lockEth('0.1');
-    // console.log(txn);
+    console.log('Transaction from locking eth:', txn);
+    await txn.onMined();
+    return;
   }
 
   async getInfo() {
     const { cdp } = this.state;
 
     const info = await cdp.getInfo();
-    // console.log(info);
+    console.log('Info fetched from new CDP:', info);
+    return;
   }
 
   async shutCdp() {
-    const { cdp, cdpId, maker } = this.state;
+    const { cdp } = this.state;
 
     const txn = await cdp.shut();
-    // console.log(txn);
-    txn.onMined();
-    // console.log(await maker.getCdp(cdpId));
+    console.log('Transaction from shutting the CDP:', txn);
+    return;
   }
 
   render() {
@@ -84,10 +95,14 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Maker Exchange Integration</h1>
         </header>
-        <p className="App-intro">
-          Check the console to see the transaction from the opened CDP and the
-          imported libraries.
-        </p>
+          <br /><p className="App-intro"><strong>Check the console to see the following functionality:</strong></p><br />
+          <p className="App-intro">Created Maker object</p>
+          <p className="App-intro">Opened CDP</p>
+          <p className="App-intro">Fetched CDP ID</p>
+          <p className="App-intro">Created CDP wrapper with CDP ID</p>
+          <p className="App-intro">Locked eth in CDP</p>
+          <p className="App-intro">Fetched CDP info</p>
+          <p className="App-intro">Shut CDP</p>
       </div>
     );
   }
