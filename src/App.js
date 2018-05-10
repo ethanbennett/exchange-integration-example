@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { ConfigFactory, Maker, service } from '@makerdao/makerdao-exchange-integration';
+import { ConfigFactory, Maker } from '@makerdao/makerdao-exchange-integration';
 
 class App extends Component {
   constructor(props) {
@@ -16,10 +16,10 @@ class App extends Component {
   }
 
   async componentDidMount() {
+    const config = ConfigFactory.create('decentralized-oasis-without-proxies');
+    config.services.web3[1].usePresetProvider = false;
     // Use ConfigFactory and 'decentralized-oasis-without-proxies' preset to initialize a maker object:
-    const maker = await new Maker(
-      ConfigFactory.create('decentralized-oasis-without-proxies')
-    );
+    const maker = await new Maker(config);
 
     this.setState({ maker: maker });
     console.log('Maker object:', maker);
