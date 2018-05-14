@@ -30,6 +30,8 @@ class App extends Component {
     await this.openCdp();
     await this.getCdp();
     await this.lockEth();
+    await this.drawDai();
+    await this.wipeDebt();
     await this.getInfo();
     await this.shutCdp();
     return;
@@ -38,10 +40,9 @@ class App extends Component {
   async openCdp() {
     // Use the maker instance to call functions:
     const { maker } = this.state;
-    const txn = await maker.openCdp()
 
     // Use transaction events to wait for events on the blockchain:
-    const cdp = await txn.onMined();
+    const cdp = await maker.openCdp();
     const cdpId = await cdp.getCdpId();
 
     console.log('Opened CDP:', cdp);
@@ -68,7 +69,6 @@ class App extends Component {
 
     const txn = await cdp.lockEth('0.1');
     console.log('Transaction from locking eth:', txn);
-    await txn.onMined();
     return;
   }
 
@@ -88,6 +88,30 @@ class App extends Component {
     return;
   }
 
+  async drawDai() {
+    const { cdp } = this.state;
+    const defaultAccount = this.state.maker._container.service('token').get('web3').defaultAccount();
+    const dai = this.state.maker._container.service('token').getToken('DAI');
+    const txn = await cdp.drawDai('1');
+    const balance = await dai.balanceOf(defaultAccount);
+    
+    console.log('Transaction from drawing Dai:', txn);
+    console.log('Dai balance after drawing:', balance);
+    return;
+  }
+
+  async wipeDebt() {
+    const { cdp } = this.state;
+    const defaultAccount = this.state.maker._container.service('token').get('web3').defaultAccount();
+    const dai = this.state.maker._container.service('token').getToken('DAI');
+    const txn = await cdp.wipeDai('1');
+    const balance = await dai.balanceOf(defaultAccount);
+
+    console.log('Transaction from wiping Dai:', txn);
+    console.log('Dai balance after wiping:', balance);
+    return;
+  }
+
   render() {
     return (
       <div className="App">
@@ -101,6 +125,8 @@ class App extends Component {
           <p className="App-intro">Fetched CDP ID</p>
           <p className="App-intro">Created CDP wrapper with CDP ID</p>
           <p className="App-intro">Locked eth in CDP</p>
+          <p className="App-intro">Drew Dai from CDP</p>
+          <p className="App-intro">Wiped Dai balance from CDP</p>
           <p className="App-intro">Fetched CDP info</p>
           <p className="App-intro">Shut CDP</p>
       </div>
