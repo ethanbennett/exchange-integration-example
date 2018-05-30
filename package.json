@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@makerdao/makerdao-exchange-integration": "0.0.36",
-    "q": "^1.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1"
@@ -15,7 +14,5 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "devDependencies": {
-    "prettier": "^1.12.1"
-  }
+  "devDependencies": {}
 }
