@@ -16,7 +16,7 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    const config = ConfigFactory.create('decentralized-oasis-without-proxies');
+    const config = ConfigFactory.create('kovan');
     config.services.web3[1].usePresetProvider = false;
     // Use ConfigFactory and 'decentralized-oasis-without-proxies' preset to initialize a maker object:
     const maker = await new Maker(config);
